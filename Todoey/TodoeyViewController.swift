@@ -9,11 +9,13 @@
 import UIKit
 
 class TodoeyViewController: UITableViewController {
-let items = ["Item 1","Item 2","Item 3","Item 4","Item 5"]
+var items = ["Item 1","Item 2","Item 3","Item 4","Item 5"]
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
     }
+    
+    //MARK - Tableview delegate
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return items.count
     }
@@ -31,7 +33,25 @@ let items = ["Item 1","Item 2","Item 3","Item 4","Item 5"]
         }
     }
     
-
+    //MARK - Barbutton Action
+    @IBAction func AddButtonPushed(_ sender: UIBarButtonItem) {
+        var txtField = UITextField()
+        let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            //When add item tapped
+            if (txtField.text?.count)!>0{
+                self.items.append(txtField.text!)
+                self.tableView.reloadData()
+            }
+        }
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Enter new item"
+            txtField = alertTextField
+        }
+        alert.addAction(action)
+        present(alert,animated: true,completion: nil)
+    }
+    
 
 }
 
