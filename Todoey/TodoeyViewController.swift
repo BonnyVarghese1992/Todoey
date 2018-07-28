@@ -9,28 +9,28 @@
 import UIKit
 
 class TodoeyViewController: UITableViewController {
-var items = ["Item 1","Item 2","Item 3","Item 4","Item 5"]
+var itemArray = [Item]()
+    let documentFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("ItemPlist.plist")
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        LoadData()
     }
     
     //MARK - Tableview delegate
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
+        return itemArray.count
     }
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TodoeyCell", for: indexPath)
-        cell.textLabel?.text = items[indexPath.row]
+        let ite = itemArray[indexPath.row]
+        cell.textLabel?.text = ite.title
+        cell.accessoryType = ite.done ? .checkmark : .none
         return cell
     }
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        }
-        else{
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+        let ite = itemArray[indexPath.row]
+        ite.done = !ite.done
+        SaveData()
     }
     
     //MARK - Barbutton Action
@@ -40,8 +40,11 @@ var items = ["Item 1","Item 2","Item 3","Item 4","Item 5"]
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //When add item tapped
             if (txtField.text?.count)!>0{
-                self.items.append(txtField.text!)
-                self.tableView.reloadData()
+                let ite = Item()
+                ite.title = txtField.text!
+                self.itemArray.append(ite)
+                self.SaveData()
+                
             }
         }
         alert.addTextField { (alertTextField) in
@@ -52,6 +55,30 @@ var items = ["Item 1","Item 2","Item 3","Item 4","Item 5"]
         present(alert,animated: true,completion: nil)
     }
     
-
+//MARK - SAVE ITEM ENCODE
+    func SaveData(){
+        let encoder = PropertyListEncoder()
+        do{
+        let data = try encoder.encode(self.itemArray)
+        try data.write(to: documentFilePath!)
+        }
+        catch{
+            
+        }
+        self.tableView.reloadData()
+    }
+    //MARK - LOAD ITEM USING DECODE
+    func LoadData(){
+        if let data = try? Data.init(contentsOf: documentFilePath!){
+            let decoder = PropertyListDecoder()
+            do{
+                self.itemArray = try decoder.decode([Item].self, from: data)
+            }
+            catch{
+                
+            }
+        }
+        self.tableView.reloadData()
+    }
 }
 
